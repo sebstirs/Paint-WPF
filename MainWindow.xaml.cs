@@ -15,6 +15,7 @@ using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using System.Windows.Media.Media3D;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using static System.Net.Mime.MediaTypeNames;
@@ -39,6 +40,9 @@ namespace Rectangles_On_Image
              colorPurple = false,
              colorBlack = false;
         SolidColorBrush brush = new SolidColorBrush(Colors.Black);
+        private bool isDragging;
+        private Point startPoint;
+        private Rectangle rect;
 
         public MainWindow()
         {
@@ -79,45 +83,29 @@ namespace Rectangles_On_Image
             else if (colorBlack == true) { brush.Color = Colors.Black; }
             else if (colorPurple == true) { brush.Color = Colors.Purple; }
 
-            
-
             newRectangle = new Rectangle
             {
                 StrokeThickness = 5
             };
 
-            newRectangle.Stroke = brush;
-            Guid guid = Guid.NewGuid();
-            newRectangle.Tag = guid;
+            newRectangle.AllowDrop = true;
+            newRectangle.MouseDown += new MouseButtonEventHandler(Canvas_MouseLeftButtonDown);
+            newRectangle.MouseMove += new MouseEventHandler(Canvas_MouseMove);
+            newRectangle.MouseUp += new MouseButtonEventHandler(Canvas_MouseLeftButtonUp);
 
-            Canvas.SetLeft(newRectangle, startPoint.X);
-            Canvas.SetTop(newRectangle, startPoint.Y);
-            myCanvas.Children.Add(newRectangle);
+            newRectangle.Stroke = brush;
+
         }
 
         private void Canvas_MouseMove(object sender, MouseEventArgs e)
         {
             Point currentPoint = e.GetPosition(myCanvas);
 
-            if (e.LeftButton == MouseButtonState.Pressed && resizecheckboxValue == true && e.OriginalSource is Rectangle)
-            {
-                Rectangle activeRectangle = (Rectangle)e.OriginalSource;
-
-                double x = Math.Min(startPoint.X, currentPoint.X);
-                double y = Math.Min(startPoint.Y, currentPoint.Y);
-
-                double width = Math.Max(startPoint.X, currentPoint.X) - x;
-                double height = Math.Max(startPoint.Y, currentPoint.Y) - y;
-
-                activeRectangle.Width = width;
-                activeRectangle.Height = height;
-
-                Canvas.SetRight(activeRectangle, x);
-                Canvas.SetBottom(activeRectangle, y);
-            }
-
             if (e.LeftButton == MouseButtonState.Pressed && rcheckboxValue == true)
             {
+                Canvas.SetLeft(newRectangle, startPoint.X);
+                Canvas.SetTop(newRectangle, startPoint.Y);
+                myCanvas.Children.Add(newRectangle);
                 double x = Math.Min(startPoint.X, currentPoint.X);
                 double y = Math.Min(startPoint.Y, currentPoint.Y);
 
@@ -129,21 +117,32 @@ namespace Rectangles_On_Image
 
                 Canvas.SetRight(newRectangle, x);
                 Canvas.SetBottom(newRectangle, y);
+                
+            }
+
+            if (e.LeftButton == MouseButtonState.Pressed && resizecheckboxValue == true)
+            {
+                newRectangle = e.Source as Rectangle;
+                if(newRectangle != null) {
+                    var scaleTransform = new ScaleTransform();
+                    scaleTransform.ScaleX = Mouse.GetPosition(newRectangle).X / newRectangle.Width;
+                    scaleTransform.ScaleY = Mouse.GetPosition(newRectangle).Y / newRectangle.Height;
+
+                    newRectangle.RenderTransform = scaleTransform;
+                }
             }
         }
-
         private void Canvas_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
-             
             newRectangle = null;
         }
         //Save rectangles for future interation
-        
+
 
         //Delete Objects
-        private void Canvas_MouseRightButtonDown(object sender, MouseButtonEventArgs e) 
+        private void Canvas_MouseRightButtonDown(object sender, MouseButtonEventArgs e)
         {
-            if (e.OriginalSource is Rectangle && e.RightButton == MouseButtonState.Pressed) 
+            if (e.OriginalSource is Rectangle && e.RightButton == MouseButtonState.Pressed)
             {
                 Rectangle activeRectangle = (Rectangle)e.OriginalSource;
                 myCanvas.Children.Remove(activeRectangle);
@@ -169,7 +168,7 @@ namespace Rectangles_On_Image
         }
         private void changeColorGreen(object sender, RoutedEventArgs e)
         {
-                colorGreen = true;
+            colorGreen = true;
         }
         private void changeColorGreenUnchecked(object sender, RoutedEventArgs e)
         {
@@ -177,7 +176,7 @@ namespace Rectangles_On_Image
         }
         private void changeColorBlack(object sender, RoutedEventArgs e)
         {
-                colorBlack = true;
+            colorBlack = true;
         }
         private void changeColorBlackUnchecked(object sender, RoutedEventArgs e)
         {
@@ -185,7 +184,7 @@ namespace Rectangles_On_Image
         }
         private void changeColorWhite(object sender, RoutedEventArgs e)
         {
-                colorWhite = true;
+            colorWhite = true;
         }
         private void changeColorWhiteUnchecked(object sender, RoutedEventArgs e)
         {
@@ -193,7 +192,7 @@ namespace Rectangles_On_Image
         }
         private void changeColorPurple(object sender, RoutedEventArgs e)
         {
-                colorPurple = true;
+            colorPurple = true;
         }
         private void changeColorPurpleUnchecked(object sender, RoutedEventArgs e)
         {

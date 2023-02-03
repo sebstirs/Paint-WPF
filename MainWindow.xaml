@@ -45,16 +45,16 @@
                     />
                 <RadioButton 
                     Name="DrawEllipse" 
-                    Checked="RCheckBox_Checked" 
-                    Unchecked ="RCheckBox_Unchecked" 
+                    Checked="ECheckBox_Checked" 
+                    Unchecked ="ECheckBox_Unchecked" 
                     Grid.Column="0" 
                     Margin="10"
                     Content="Ellipse"
                     />
                 <RadioButton 
                     Name="Pen" 
-                    Checked="RCheckBox_Checked" 
-                    Unchecked ="RCheckBox_Unchecked" 
+                    Checked="PCheckBox_Checked" 
+                    Unchecked ="PCheckBox_Unchecked" 
                     Grid.Column="0" 
                      Margin="10"
                     Content="Pen"

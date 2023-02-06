@@ -158,7 +158,7 @@
                     Stretch="Uniform"/>
             </Border>
             <Canvas 
-                x:Name="myCanvas" 
+                x:Name="canvas" 
                 Background="Transparent" 
                 MouseLeftButtonDown="Canvas_MouseLeftButtonDown"
                 MouseMove="Canvas_MouseMove" 

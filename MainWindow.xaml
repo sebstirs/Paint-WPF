@@ -57,7 +57,7 @@
                     Unchecked ="PCheckBox_Unchecked" 
                     Grid.Column="0" 
                      Margin="10"
-                    Content="Pen"
+                    Content="Line"
                     />
                 <RadioButton 
                     Name="Resize" 

@@ -13,6 +13,7 @@ using Point = System.Windows.Point;
 using System.Security.Cryptography.X509Certificates;
 using System.IO;
 using static System.Net.Mime.MediaTypeNames;
+using System.Linq;
 
 namespace Rectangles_On_Image
 {
@@ -25,6 +26,7 @@ namespace Rectangles_On_Image
         //Variables
         private Point startPoint;
         private Rectangle newRectangle;
+        private Ellipse newEllipse;
         bool rcheckboxValue = false, echeckboxValue = false, pcheckboxValue = false, resizecheckboxValue, dcheckboxValue;
         bool colorRed = false,
              colorBlue = false,
@@ -98,6 +100,7 @@ namespace Rectangles_On_Image
 
             brush = new SolidColorBrush();
 
+            //Check Value of Brush Color
             if (colorRed == true) { brush.Color = Colors.Red; }
             else if (colorBlue == true) { brush.Color = Colors.Blue; }
             else if (colorGreen == true) { brush.Color = Colors.Green; }
@@ -105,19 +108,36 @@ namespace Rectangles_On_Image
             else if (colorBlack == true) { brush.Color = Colors.Black; }
             else if (colorPurple == true) { brush.Color = Colors.Purple; }
 
+            //Recolor a Rectangle
             if (e.OriginalSource is Rectangle && e.LeftButton == MouseButtonState.Pressed)
             {
                 Rectangle activeRectangle = e.OriginalSource as Rectangle;
-
                 if (activeRectangle != null)
                 {
-
                     activeRectangle.Stroke = brush;
-
                 }
 
             }
+            //Recolor an Ellipse
+            if (e.OriginalSource is Ellipse && e.LeftButton == MouseButtonState.Pressed)
+            {
+                Ellipse activeEllipse = e.OriginalSource as Ellipse;
+                if (activeEllipse != null)
+                {
+                    activeEllipse.Stroke = brush;
+                }
+            }
+            //Recolor a Line
+            if (e.OriginalSource is Line && e.LeftButton == MouseButtonState.Pressed)
+            {
+                Line activeLine = e.OriginalSource as Line;
+                if (activeLine != null)
+                {
+                    activeLine.Stroke = brush;
+                }
+            }
 
+            //Draw Rectangle
             if (e.LeftButton == MouseButtonState.Pressed && rcheckboxValue == true)
             {
                 startPoint = e.GetPosition(canvas);
@@ -130,14 +150,40 @@ namespace Rectangles_On_Image
                 Canvas.SetLeft(newRectangle, startPoint.X);
                 Canvas.SetTop(newRectangle, startPoint.Y);
             }
-            
-            
+            //Draw Ellipse
+            if (e.LeftButton == MouseButtonState.Pressed && echeckboxValue == true)
+            {
+                startPoint = e.GetPosition(canvas);
+                newEllipse = new Ellipse()
+                {
+                    Stroke = brush,
+                    StrokeThickness = 5
+                };
+                canvas.Children.Add(newEllipse);
+                Canvas.SetLeft(newEllipse, startPoint.X);
+                Canvas.SetTop(newEllipse, startPoint.Y);
+            }
+            //Draw Pen
+            if (e.LeftButton == MouseButtonState.Pressed && pcheckboxValue == true)
+            {
+                Line line = new Line();
+                line.Stroke = brush;
+                line.StrokeThickness = 3;
+                line.X1 = startPoint.X;
+                line.Y1 = startPoint.Y;
+                line.X2 = startPoint.X;
+                line.Y2 = startPoint.Y;
+
+                // Add the Line object to the Canvas
+                canvas.Children.Add(line);
+            }
         }
 
         //Functions for Mouse Movement When Mouse is over Canvas
         private void Canvas_MouseMove(object sender, MouseEventArgs e)
         {
 
+            //Draw Rectangle
             if (e.LeftButton == MouseButtonState.Pressed && rcheckboxValue == true)
             {
                 Point currentPoint = e.GetPosition(canvas);
@@ -152,7 +198,7 @@ namespace Rectangles_On_Image
                 newRectangle.Height = height;
 
             }
-
+            //Resize Tool
             if (e.LeftButton == MouseButtonState.Pressed && resizecheckboxValue == true)
             {
                 Rectangle activeRectangle = e.Source as Rectangle;
@@ -165,7 +211,7 @@ namespace Rectangles_On_Image
                 }
 
             }
-
+            //Drag Tool
             if (e.LeftButton == MouseButtonState.Pressed && dcheckboxValue == true)
             {
                 Point currentPoint = e.GetPosition(canvas);
@@ -180,30 +226,78 @@ namespace Rectangles_On_Image
                     Canvas.SetTop(activeRectangle, y);
                 }
             }
+            //Ellipse Tool
+            if (e.LeftButton == MouseButtonState.Pressed && echeckboxValue == true)
+            {
+                Point currentPoint = e.GetPosition(canvas);
+                if(newEllipse != null) 
+                {
+                    double x = Math.Min(startPoint.X, currentPoint.X);
+                    double y = Math.Min(startPoint.Y, currentPoint.Y);
+
+                    double width = Math.Max(startPoint.X, currentPoint.X) - x;
+                    double height = Math.Max(startPoint.Y, currentPoint.Y) - y;
+
+                    newEllipse.Width = width;
+                    newEllipse.Height = height;
+                }
+                
+            }
+            //Line Tool
+            if (e.LeftButton == MouseButtonState.Pressed && pcheckboxValue == true)
+            {
+                Point currentPoint = e.GetPosition(canvas);
+
+                // Update the end point of the Line object
+                Line line = (Line)canvas.Children[canvas.Children.Count - 1];
+                line.X2 = currentPoint.X;
+                line.Y2 = currentPoint.Y;
+            }
+
         }
 
+        //set Rectangle and Ellipse to null when Mouse is not clicked
         private void Canvas_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
             newRectangle = null;
+            newEllipse = null;
         }
-        //Save rectangles for future interation
 
+        //Keep Objects from excceding Canvas Bounds
+        private void canvas_PreviewMouseDown(object sender, MouseButtonEventArgs e)
+        {
+            canvas.Children.OfType<UIElement>().ToList().ForEach(x => x.IsHitTestVisible = false);
+        }
 
-        //Delete Objects
+        //Delete All Objects on Canvas
         public void clearAll(object sender, RoutedEventArgs e)
         {
             canvas.Children.Clear();
         }
+        //Delete Single Object from Canvas
         private void Canvas_MouseRightButtonDown(object sender, MouseButtonEventArgs e)
         {
+            //Delete Rectangle
             if (e.OriginalSource is Rectangle && e.RightButton == MouseButtonState.Pressed)
             {
                 Rectangle activeRectangle = (Rectangle)e.OriginalSource;
                 canvas.Children.Remove(activeRectangle);
             }
+            //Delete Ellipse
+            if (e.OriginalSource is Ellipse && e.RightButton == MouseButtonState.Pressed)
+            {
+                Ellipse activeEllipse = (Ellipse)e.OriginalSource;
+                canvas.Children.Remove(activeEllipse);
+            }
+            //Delete Line
+            if (e.OriginalSource is Line && e.RightButton == MouseButtonState.Pressed)
+            {
+                Line activeLine = (Line)e.OriginalSource;
+                canvas.Children.Remove(activeLine);
+            }
         }
 
-        //Change Rectangle Color
+        //Radio Buttons for Changing Color
         private void changeColorRed(object sender, RoutedEventArgs e)
         {
             colorRed = true;
@@ -253,7 +347,7 @@ namespace Rectangles_On_Image
             colorPurple = false;
         }
 
-        //Buttons for draw tools 
+        //Radio Buttons for draw tools 
         private void RCheckBox_Checked(object sender, RoutedEventArgs e)
         {
             rcheckboxValue = true;
@@ -264,7 +358,6 @@ namespace Rectangles_On_Image
         }
         private void ECheckBox_Checked(object sender, RoutedEventArgs e)
         {
-
             echeckboxValue = true;
         }
         private void ECheckBox_Unchecked(object sender, RoutedEventArgs e)

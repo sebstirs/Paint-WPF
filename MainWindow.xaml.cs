@@ -10,6 +10,7 @@ using System.Windows.Shapes;
 using System.Drawing;
 using Rectangle = System.Windows.Shapes.Rectangle;
 using Point = System.Windows.Point;
+using System.Security.Cryptography.X509Certificates;
 
 namespace Rectangles_On_Image
 {
@@ -69,6 +70,19 @@ namespace Rectangles_On_Image
             else if (colorBlack == true) { brush.Color = Colors.Black; }
             else if (colorPurple == true) { brush.Color = Colors.Purple; }
 
+            if (e.OriginalSource is Rectangle && e.LeftButton == MouseButtonState.Pressed)
+            {
+                Rectangle activeRectangle = e.OriginalSource as Rectangle;
+
+                if (activeRectangle != null)
+                {
+
+                    activeRectangle.Stroke = brush;
+
+                }
+
+            }
+
             if (e.LeftButton == MouseButtonState.Pressed && rcheckboxValue == true)
             {
                 startPoint = e.GetPosition(canvas);
@@ -81,6 +95,8 @@ namespace Rectangles_On_Image
                 Canvas.SetLeft(newRectangle, startPoint.X);
                 Canvas.SetTop(newRectangle, startPoint.Y);
             }
+            
+            
         }
 
         private void Canvas_MouseMove(object sender, MouseEventArgs e)
@@ -128,7 +144,6 @@ namespace Rectangles_On_Image
                     Canvas.SetLeft(activeRectangle, x);
                     Canvas.SetTop(activeRectangle, y);
                 }
-
             }
         }
 

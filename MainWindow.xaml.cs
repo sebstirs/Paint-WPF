@@ -11,6 +11,8 @@ using System.Drawing;
 using Rectangle = System.Windows.Shapes.Rectangle;
 using Point = System.Windows.Point;
 using System.Security.Cryptography.X509Certificates;
+using System.IO;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace Rectangles_On_Image
 {
@@ -20,6 +22,7 @@ namespace Rectangles_On_Image
 
     public partial class MainWindow : Window
     {
+        //Variables
         private Point startPoint;
         private Rectangle newRectangle;
         bool rcheckboxValue = false, echeckboxValue = false, pcheckboxValue = false, resizecheckboxValue, dcheckboxValue;
@@ -29,6 +32,7 @@ namespace Rectangles_On_Image
              colorWhite = false,
              colorPurple = false,
              colorBlack = false;
+        //Image picture = new Image();
         SolidColorBrush brush = new SolidColorBrush(Colors.Black);
 
         public MainWindow()
@@ -36,27 +40,58 @@ namespace Rectangles_On_Image
             InitializeComponent();
         }
 
+        //Choose and Upload a Picture
         private void UploadButton_Click(object sender, RoutedEventArgs e)
         {
+            System.Windows.Controls.Image picture = new System.Windows.Controls.Image();
             Microsoft.Win32.OpenFileDialog openFileDialog = new OpenFileDialog();
+
             openFileDialog.Filter = "Image files| *.jpg;*.png;";
             openFileDialog.FilterIndex = 1;
+
             if (openFileDialog.ShowDialog() == true)
             {
-                picture.Source = new BitmapImage(new Uri(openFileDialog.FileName));
+                string filePath = openFileDialog.FileName;
+                Uri fileUri = new Uri(filePath);
+                picture.Source = new BitmapImage(fileUri);
+                picture.Stretch = Stretch.Uniform;
+
+                picture.Width = 250;
+                picture.Height = 250;
+
+                Canvas.SetLeft(picture, (canvas.ActualWidth / 2) - picture.Width / 2);
+                Canvas.SetTop(picture, (canvas.ActualHeight / 2) - picture.Height / 2);
+
+                canvas.Children.Add(picture);
             }
         }
+        //Save Picture
         private void Save_Click(object sender, RoutedEventArgs e)
         {
-
+            SaveFileDialog saveFileDialog = new SaveFileDialog();
+            saveFileDialog.Filter = "JPEG image (*.jpg)|*.jpg";
+            saveFileDialog.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyPictures);
+            if (saveFileDialog.ShowDialog() == true)
+            {
+                RenderTargetBitmap renderTargetBitmap =
+                    new RenderTargetBitmap((int)canvas.ActualWidth, (int)canvas.ActualHeight, 96, 96, PixelFormats.Pbgra32);
+                renderTargetBitmap.Render(canvas);
+                BitmapEncoder bitmapEncoder = new JpegBitmapEncoder();
+                bitmapEncoder.Frames.Add(BitmapFrame.Create(renderTargetBitmap));
+                using (Stream stream = saveFileDialog.OpenFile())
+                {
+                    bitmapEncoder.Save(stream);
+                }
+            }
         }
+        //Close Window
         private void Exit_Click(object sender, RoutedEventArgs e)
         {
             this.Close();
         }
 
 
-        //Draw Rectangles
+        //Functions for When Mouse Button is Clicked
         private void Canvas_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             startPoint = e.GetPosition(canvas);
@@ -99,9 +134,9 @@ namespace Rectangles_On_Image
             
         }
 
+        //Functions for Mouse Movement When Mouse is over Canvas
         private void Canvas_MouseMove(object sender, MouseEventArgs e)
         {
-            //Point currentPoint = e.GetPosition(canvas);
 
             if (e.LeftButton == MouseButtonState.Pressed && rcheckboxValue == true)
             {
@@ -155,6 +190,10 @@ namespace Rectangles_On_Image
 
 
         //Delete Objects
+        public void clearAll(object sender, RoutedEventArgs e)
+        {
+            canvas.Children.Clear();
+        }
         private void Canvas_MouseRightButtonDown(object sender, MouseButtonEventArgs e)
         {
             if (e.OriginalSource is Rectangle && e.RightButton == MouseButtonState.Pressed)
@@ -241,7 +280,6 @@ namespace Rectangles_On_Image
         {
             pcheckboxValue = false;
         }
-
         private void ResizeCheckBox_Checked(object sender, RoutedEventArgs e)
         {
 
@@ -259,10 +297,6 @@ namespace Rectangles_On_Image
         private void DCheckBox_Unchecked(object sender, RoutedEventArgs e)
         {
             dcheckboxValue = false;
-        }
-        public void clearAll(object sender, RoutedEventArgs e)
-        {
-            canvas.Children.Clear();
         }
     }
 }

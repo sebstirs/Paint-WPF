@@ -153,9 +153,7 @@
                 BorderBrush="Black" 
                 Margin="10,10,10,10" 
                 Grid.Column="2">
-                <Image 
-                    x:Name="picture" 
-                    Stretch="Uniform"/>
+                
             </Border>
             <Canvas 
                 x:Name="canvas" 

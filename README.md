@@ -10,6 +10,8 @@ This Repository does the following
 7. Delete any shape.
 8. Save the changes to a new image.
 
+Instructions on how to use
+
 1. To upload an Image Select the Menu Tab in the Top Left corner and select Upload.  
 2. Pick an image and click Select. 
 3. To create a Rectangle, Ellipse or Line, select the Button corralating with the tool you wish to use. 

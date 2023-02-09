@@ -1,15 +1,3 @@
-# Rectangles On Image
-
-This Repository does the following
-1. Select and load an image.
-2. Draw one rectangle or more over the image by clicking and dragging the mouse to draw (the size of the rectangle depends on how much the user drags the mouse)
-3. Draw an Ellipse or Line
-4. Only allow drawing inside the picture.
-5. Change a Shapes color by clicking each shape and selecting a different color from a color palette.
-6. Resize the rectangle(s) and be able to drag-drop any of them.
-7. Delete any shape.
-8. Save the changes to a new image.
-
 Instructions on how to use
 
 1. To upload an Image Select the Menu Tab in the Top Left corner and select Upload.  
